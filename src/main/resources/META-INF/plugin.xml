@@ -1,0 +1,101 @@
+<idea-plugin>
+    <!--
+      id / name / version / vendor / idea-version build.gradle.kts içindeki
+      pluginConfiguration bloğundan enjekte edilir; burada tekrarlanmaz.
+
+      YALNIZCA com.intellij.modules.platform'a bağlıyız. Dile özgü modüller
+      (com.intellij.modules.java, ...Python vb.) eklenmemeli — bu bağımlılık
+      eklenti IDEA, DataGrip, WebStorm ve PyCharm'da çalışsın diye böyle.
+    -->
+    <depends>com.intellij.modules.platform</depends>
+
+    <!--
+      Satır içi tamamlama (spec 006) ayrı dosyada ve İSTEĞE BAĞLI.
+
+      Sebep: uzantı noktası platform seviyesinde tanımlı olsa da, uyguladığımız
+      sınıflar (DebouncedInlineCompletionProvider, InlineCompletionGrayTextElement)
+      intellij.platform.lang.impl içinde. `lang` modülü bulunmayan bir üründe
+      koşulsuz kayıt eklentinin TAMAMEN yüklenememesine yol açardı; böyle
+      olduğunda yalnızca bu özellik devre dışı kalır, sohbet çalışmaya devam eder.
+
+      Dört hedef IDE'de de (IDEA, DataGrip, WebStorm, PyCharm) `lang` vardır;
+      bu bağımlılık işlev kaybettirmez, yalnızca çökmeyi önler.
+    -->
+    <depends optional="true" config-file="acp-completion.xml">com.intellij.modules.lang</depends>
+
+    <resource-bundle>messages.AcpBundle</resource-bundle>
+
+    <extensionPoints>
+        <!--
+          Dile özgü bağlam sağlayıcıları ileride buraya bağlanır (örn. Java PSI ile
+          ilgili sınıfları bulan bir modül) — çekirdeğe dokunmadan.
+        -->
+        <extensionPoint name="contextProvider"
+                        interface="dev.acp.context.ContextProvider"
+                        dynamic="true"/>
+    </extensionPoints>
+
+    <extensions defaultExtensionNs="dev.acp.assistant">
+        <contextProvider implementation="dev.acp.context.SelectionContextProvider"/>
+    </extensions>
+
+    <extensions defaultExtensionNs="com.intellij">
+        <toolWindow
+            id="ACP"
+            anchor="right"
+            factoryClass="dev.acp.ui.chat.ChatToolWindowFactory"/>
+
+        <!--
+          bundle="messages.AcpBrandingBundle" build zamanında ÜRETİLİR
+          (bkz. generateBranding). Böylece ayarlar ağacındaki başlık markalı addan
+          gelir ve platform sınıfı erkenden yüklemek zorunda kalmaz.
+
+          key/bundle olmadan platform şu SEVERE'i düşürüyordu:
+            "No display name specified in plugin descriptor XML file for configurable"
+        -->
+        <applicationConfigurable
+            parentId="tools"
+            id="dev.acp.settings"
+            instance="dev.acp.settings.AcpSettingsConfigurable"
+            key="settings.title"
+            bundle="messages.AcpBrandingBundle"/>
+        <!-- Proje bazında ayarlar (spec 009): doğrulama komutu. workspace.xml'de. -->
+        <projectConfigurable
+            parentId="dev.acp.settings"
+            id="dev.acp.settings.project"
+            instance="dev.acp.settings.AcpProjeAyarlariConfigurable"
+            key="settings.project.title"
+            bundle="messages.AcpBundle"/>
+
+        <notificationGroup id="ACP" displayType="BALLOON"/>
+
+        <!--
+          Alt+Enter girişi. <language> boş: dile özgü değil, dört IDE'de de
+          çalışır (Altın Kural 3).
+        -->
+        <intentionAction>
+            <language></language>
+            <className>dev.acp.actions.AcpIntentionAction</className>
+            <bundleName>messages.AcpBundle</bundleName>
+            <categoryKey>intention.category</categoryKey>
+        </intentionAction>
+    </extensions>
+
+    <actions>
+        <!--
+          Kısayol atanmıyor (spec 003 Belirsizlik 2): IDE'nin kısayol alanı dolu
+          ve ekipte farklı keymap kullananlar var. Eylemler Keymap ekranında
+          görünüyor; isteyen kendisi atar.
+
+          Metinler messages.AcpBundle içinden `action.<id>.text` anahtarlarıyla
+          geliyor.
+        -->
+        <group id="dev.acp.EditorPopup" popup="true">
+            <add-to-group group-id="EditorPopupMenu" anchor="last"/>
+            <action id="dev.acp.Explain" class="dev.acp.actions.ExplainSelectionAction"/>
+            <action id="dev.acp.Test" class="dev.acp.actions.GenerateTestAction"/>
+            <action id="dev.acp.Refactor" class="dev.acp.actions.RefactorSelectionAction"/>
+            <action id="dev.acp.Docs" class="dev.acp.actions.AddDocsAction"/>
+        </group>
+    </actions>
+</idea-plugin>

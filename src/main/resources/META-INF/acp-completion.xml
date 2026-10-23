@@ -1,0 +1,33 @@
+<idea-plugin>
+    <!--
+      Satır içi kod tamamlama (spec 006).
+
+      Yalnızca com.intellij.modules.lang mevcutken yüklenir; bkz. plugin.xml.
+    -->
+    <extensions defaultExtensionNs="com.intellij">
+        <!--
+          Uzantı noktasının adı "inline.completion.provider" — "inlineCompletionProvider"
+          DEĞİL. Yanlış yazılsaydı eklenti sessizce yüklenir, sağlayıcı hiç
+          çağrılmazdı; tam bu tür bir isim hatası bağlam sağlayıcıda başımıza geldi
+          (bkz. AGENTS.md). Ad, IDE'nin EditorExtensionPoints.xml dosyasından
+          doğrulandı.
+
+          Kayıt kendiliğinden istek göndermeye yol açmaz: varsayılan biçim KAPALI
+          ve isEnabled her tetiklemede ayarı okur.
+        -->
+        <inline.completion.provider
+            implementation="dev.acp.completion.AcpInlineCompletionProvider"/>
+
+        <!--
+          İlişki araması (spec 010): kullanımlar, uygulamalar, tanım. Aynı
+          isteğe bağlı dosyada, çünkü aynı modüle (lang) iki ayrı <depends>
+          yazılmıyor. API'lerin hepsi platform.lang'da, dile özgü değil. Kayıt
+          yoksa IliskiArayici.getInstance null döner, araçlar metin aramasına düşer.
+        -->
+        <projectService
+            serviceInterface="dev.acp.anlama.IliskiArayici"
+            serviceImplementation="dev.acp.anlama.PsiIliskiArayici"/>
+        <!-- Yalnızca -Pacp.iliskiDenetimi=true ile çalışır; bayraksız hiçbir şey yapmaz (spec 010 T32). -->
+        <postStartupActivity implementation="dev.acp.anlama.IliskiDenetimi"/>
+    </extensions>
+</idea-plugin>

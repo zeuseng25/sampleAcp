@@ -1,0 +1,12 @@
+.gradle/
+build/
+out/
+# IntelliJ Platform Gradle Plugin'in ürettiği yerel artifact ve sandbox
+.intellijPlatform/
+.idea/
+*.iml
+local.properties
+
+# İlişki denetiminin örnek projesi (spec 010 T32) kendi proje dosyalarıyla açılır.
+!src/test/testData/**/.idea/
+!src/test/testData/**/*.iml
