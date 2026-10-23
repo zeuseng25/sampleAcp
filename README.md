@@ -6,8 +6,13 @@ Tek kod tabanı; **IntelliJ IDEA, DataGrip, WebStorm ve PyCharm**'da çalışır
 
 ## Kurulum ve dağıtım
 
-- **Kendi kurumunuzda derleyip Nexus'a yükleyecekseniz:** [docs/yayinlama-rehberi.md](docs/yayinlama-rehberi.md)
-- **Ekip üyesi olarak kuracaksanız:** [docs/kurulum.md](docs/kurulum.md)
+**[docs/kurulum.md](docs/kurulum.md)** — adım adım:
+
+- **A.** Projeyi indirip derlemek, kurumunuzun Nexus'una yüklemek ve ekibe yayınlamak
+- **B.** Ekip üyesi olarak eklentiyi IDE'ye kurmak
+
+Ayrıntılar (Nexus'u `curl` ile hazırlama, yayın hataları, Artifactory, CI):
+[docs/yayinlama-rehberi.md](docs/yayinlama-rehberi.md).
 
 ## Geliştirme
 
